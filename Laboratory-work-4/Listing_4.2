@@ -1,0 +1,78 @@
+# --- Вхідні дані ---
+PHRASE = "Як дбаєш, так і маєш: хто землю робить, той хліб добрий робить"
+
+ALPHABET = {
+    'а': 1, 'б': 2, 'в': 3, 'г': 4, 'ґ': 5, 'д': 6, 'е': 7, 'є': 8, 'ж': 9, 'з': 10,
+    'и': 11, 'і': 12, 'ї': 13, 'й': 14, 'к': 15, 'л': 16, 'м': 17, 'н': 18, 'о': 19,
+    'п': 20, 'р': 21, 'с': 22, 'т': 23, 'у': 24, 'ф': 25, 'х': 26, 'ц': 27, 'ч': 28,
+    'ш': 29, 'щ': 30, 'ь': 31, 'ю': 32, 'я': 33
+}
+
+
+# --- Допоміжні функції ---
+def get_key_sum(word):
+    """Обчислює суму кодів літер у слові."""
+    s = 0
+    for char in word.lower():
+        s += ALPHABET.get(char, 0)
+    return s
+
+
+def hash_division(key, m):
+    """Хеш-функція методом ділення."""
+    return key % m
+
+
+# --- Підготовка даних ---
+# Розбиваємо фразу на слова та видаляємо зайві знаки
+cleaned_words = [w.strip(",:.") for w in PHRASE.split()]
+
+
+# --- Основні функції хешування ---
+
+def build_open_addressing_table(words, m, hash_func):
+    """Будує хеш-таблицю з відкритою адресацією (лінійне дослідження)."""
+    table = [None] * m
+
+    # Фільтрація дублікатів (залишаємо унікальні слова для коректної вставки)
+    unique_words = []
+    seen = set()
+    for w in words:
+        if w not in seen:
+            unique_words.append(w)
+            seen.add(w)
+
+    for word in unique_words:
+        key_val = get_key_sum(word)
+        start_idx = hash_func(key_val, m)
+
+        inserted = False
+        # Лінійне дослідження
+        for i in range(m):
+            idx = (start_idx + i) % m
+            if table[idx] is None:
+                table[idx] = word
+                inserted = True
+                break
+
+        if not inserted:
+            print(f"Помилка: Таблиця переповнена. Не вдалося вставити слово: {word}")
+
+    return table
+
+
+def display_oa_table(table, title):
+    """Візуалізація таблиці."""
+    print(f"\n--- {title} ---")
+    print("Індекс | Слово")
+    print("-------|-------")
+    for i, item in enumerate(table):
+        val = item if item is not None else "(NULL)"
+        print(f"{i:02d}     | {val}")
+
+
+# --- Запуск ---
+# Хешування з відкритою адресацією (Метод ділення M=13)
+table_oa_div = build_open_addressing_table(cleaned_words, 13, hash_division)
+display_oa_table(table_oa_div, "Хеш-таблиця (Відкрита адресація, M=13)")
+
