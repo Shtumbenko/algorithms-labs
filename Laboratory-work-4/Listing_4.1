@@ -1,0 +1,57 @@
+import math
+
+# Дані варіанту
+PHRASE = "Як дбаєш, так і маєш: хто землю робить, той хліб добрий робить"
+# Словник позицій
+ALPHABET = {
+    'а': 1, 'б': 2, 'в': 3, 'г': 4, 'ґ': 5, 'д': 6, 'е': 7, 'є': 8, 'ж': 9, 'з': 10,
+    'и': 11, 'і': 12, 'ї': 13, 'й': 14, 'к': 15, 'л': 16, 'м': 17, 'н': 18, 'о': 19,
+    'п': 20, 'р': 21, 'с': 22, 'т': 23, 'у': 24, 'ф': 25, 'х': 26, 'ц': 27, 'ч': 28,
+    'ш': 29, 'щ': 30, 'ь': 31, 'ю': 32, 'я': 33
+}
+
+def get_key_sum(word):
+    s = 0
+    for char in word.lower():
+        s += ALPHABET.get(char, 0)
+    return s
+
+def hash_division(key, m):
+    return key % m
+
+def hash_multiplication(key, m):
+    A = (math.sqrt(5) - 1) / 2
+    return math.floor(m * ((key * A) % 1))
+
+def build_chain_table(words, m, hash_func):
+    table = [[] for _ in range(m)]
+    unique_words = []
+    # Фільтруємо дублікати для чистоти експерименту словника
+    seen = set()
+    for w in words:
+        if w not in seen:
+            unique_words.append(w)
+            seen.add(w)
+
+    for word in unique_words:
+        key_val = get_key_sum(word)
+        idx = hash_func(key_val, m)
+        table[idx].append(word)
+    return table
+
+def display_chain_table(table, title):
+    print(f"\n--- {title} ---")
+    for i, chain in enumerate(table):
+        print(f"Індекс {i:02d}: {chain}")
+
+# Підготовка даних
+cleaned_words = [w.strip(",:.") for w in PHRASE.split()]
+
+# 1. Хешування з ланцюжками (Метод ділення M=13)
+table_chain_div = build_chain_table(cleaned_words, 13, hash_division)
+display_chain_table(table_chain_div, "Результати побудови відкритої хеш-таблиці (Метод ділення, M=13)")
+
+# Додатково: Метод множення (M=16)
+table_chain_mult = build_chain_table(cleaned_words, 16, hash_multiplication)
+# display_chain_table(table_chain_mult, "Результати побудови відкритої хеш-таблиці (Метод множення, M=16)")
+
