@@ -1,0 +1,93 @@
+class Graph:
+    def __init__(self, vertices):
+        self.V = vertices
+        self.graph = []
+
+    # Додавання ребра
+    def add_edge(self, u, v, w):
+        self.graph.append([u, v, w])
+
+    # Знайти батька елемента i (з оптимізацією стиснення шляху)
+    def find(self, parent, i):
+        if parent[i] == i:
+            return i
+        return self.find(parent, parent[i])
+
+    # Об'єднання двох множин x та y
+    def union(self, parent, rank, x, y):
+        xroot = self.find(parent, x)
+        yroot = self.find(parent, y)
+
+        if rank[xroot] < rank[yroot]:
+            parent[xroot] = yroot
+        elif rank[xroot] > rank[yroot]:
+            parent[yroot] = xroot
+        else:
+            parent[yroot] = xroot
+            rank[xroot] += 1
+
+    # Основна функція Крускала
+    def kruskal_mst(self):
+        result = []  # Тут буде зберігатися МКД
+        i = 0  # Індекс для відсортованих ребер
+        e = 0  # Індекс для result[]
+
+        # Крок 1: Сортування ребер за вагою
+        self.graph = sorted(self.graph, key=lambda item: item[2])
+
+        parent = []
+        rank = []
+
+        # Створення підмножин для кожної вершини
+        for node in range(self.V):
+            parent.append(node)
+            rank.append(0)
+
+        print("Алгоритм Крускала (Варіант 22)")
+        print("Ребро  : Вага")
+        print("--------------")
+
+        # Поки не наберемо V-1 ребер
+        while e < self.V - 1:
+            # Беремо найменше ребро
+            if i >= len(self.graph):
+                 break
+            u, v, w = self.graph[i]
+            i = i + 1
+
+            x = self.find(parent, u)
+            y = self.find(parent, v)
+
+            # Якщо не утворює цикл (різні батьки)
+            if x != y:
+                e = e + 1
+                result.append([u, v, w])
+                self.union(parent, rank, x, y)
+                # Виводимо ребро (додаємо +1 для відображення 1-8)
+                print(f"{u + 1} - {v + 1}  : {w}")
+
+        # Підрахунок загальної ваги
+        total_weight = sum([item[2] for item in result])
+        print("--------------")
+        print("Загальна вага МКД:", total_weight)
+
+# Створення графа з 8 вершинами (індекси 0-7)
+g = Graph(8)
+
+# Додавання ребер (віднімаємо 1 від номерів вершин для індексації з 0)
+# (1, 3) = 1 -> (0, 2, 1)
+g.add_edge(0, 2, 1) # 1-3
+g.add_edge(0, 3, 6) # 1-4
+g.add_edge(0, 1, 4) # 1-2
+g.add_edge(2, 7, 2) # 3-8
+g.add_edge(1, 3, 8) # 2-4
+g.add_edge(1, 5, 3) # 2-6
+g.add_edge(3, 4, 3) # 4-5
+g.add_edge(5, 7, 1) # 6-8
+g.add_edge(5, 4, 9) # 6-5
+g.add_edge(5, 6, 7) # 6-7
+g.add_edge(7, 6, 7) # 8-7
+g.add_edge(4, 6, 5) # 5-7
+
+g.kruskal_mst()
+
