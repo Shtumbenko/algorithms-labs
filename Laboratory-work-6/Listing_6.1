@@ -1,0 +1,68 @@
+import heapq
+
+def dijkstra(graph, start_node):
+    # Ініціалізація
+    dist = {node: float('inf') for node in graph}
+    pred = {node: -1 for node in graph}
+    dist[start_node] = 0
+
+    # Пріоритетна черга: (відстань, вершина)
+    pq = [(0, start_node)]
+
+    print(f"Пошук найкоротшого шляху з вершини {start_node} (Алгоритм Дейкстри):")
+    print("-" * 50)
+
+    while pq:
+        current_dist, u = heapq.heappop(pq)
+
+        # Якщо поточна відстань більше ніж збережена, пропускаємо
+        if current_dist > dist[u]:
+            continue
+
+        # Перебір суміжних вершин
+        for v, weight in graph[u].items():
+            if dist[v] > dist[u] + weight:
+                dist[v] = dist[u] + weight
+                pred[v] = u
+                heapq.heappush(pq, (dist[v], v))
+
+    return dist, pred
+
+def get_path(pred, target):
+    path = []
+    curr = target
+    while curr != -1:
+        path.append(curr)
+        curr = pred[curr]
+    return path[::-1]
+
+# Опис графа
+# Формат: {вершина: {сусід: вага, ...}}
+graph_22 = {
+    1: {2: 4, 3: 1, 4: 6},
+    2: {1: 4, 4: 8, 6: 3},
+    3: {1: 1, 8: 2},
+    4: {1: 6, 2: 8, 5: 3},
+    5: {4: 3, 6: 9, 7: 5},
+    6: {2: 3, 5: 9, 8: 1, 7: 7},
+    7: {5: 5, 6: 7, 8: 7},
+    8: {3: 2, 6: 1, 7: 7}
+}
+
+# Виконання
+distances, predecessors = dijkstra(graph_22, 1)
+
+# Вивід результатів
+print(f"{'Вершина':<10} | {'Вага':<10} | {'Шлях'}")
+print("-" * 40)
+sorted_nodes = sorted(graph_22.keys())
+for node in sorted_nodes:
+    path = get_path(predecessors, node)
+    path_str = " -> ".join(map(str, path))
+    print(f"{node:<10} | {distances[node]:<10} | {path_str}")
+
+# Перевірка на співпадіння з ручним розрахунком
+manual_results = {1: 0, 2: 4, 3: 1, 4: 6, 5: 9, 6: 4, 7: 10, 8: 3}
+print("-" * 40)
+match = all(distances[n] == manual_results[n] for n in manual_results)
+print(f"Результати ручного та автоматизованого розрахунку співпадають: {match}")

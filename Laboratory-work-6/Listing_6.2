@@ -1,0 +1,59 @@
+def floyd_warshall(graph, num_nodes):
+    # Ініціалізація матриці нескінченністю
+    dist = [[float('inf')] * (num_nodes + 1) for _ in range(num_nodes + 1)]
+
+    # Заповнення діагоналі нулями
+    for i in range(1, num_nodes + 1):
+        dist[i][i] = 0
+
+    # Заповнення вагами ребер
+    for u in graph:
+        for v, w in graph[u].items():
+            dist[u][v] = w
+            dist[v][u] = w
+
+    print("Початкова матриця (D^0):")
+    print_matrix(dist, num_nodes)
+
+    # Основний цикл алгоритму
+    for k in range(1, num_nodes + 1):
+        for i in range(1, num_nodes + 1):
+            for j in range(1, num_nodes + 1):
+                dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+
+    return dist
+
+
+def print_matrix(dist, num_nodes):
+    print("   ", end="")
+    for i in range(1, num_nodes + 1):
+        print(f"{i:4}", end="")
+    print("\n" + "-" * (num_nodes * 5 + 4))
+    for i in range(1, num_nodes + 1):
+        print(f"{i} |", end="")
+        for j in range(1, num_nodes + 1):
+            val = dist[i][j]
+            if val == float('inf'):
+                print(f"{'inf':4}", end="")
+            else:
+                print(f"{val:4}", end="")
+        print()
+
+
+# Дані графа
+graph_22 = {
+    1: {2: 4, 3: 1, 4: 6},
+    2: {4: 8, 6: 3},
+    3: {8: 2},
+    4: {5: 3},
+    5: {6: 9, 7: 5},
+    6: {8: 1, 7: 7},
+    7: {8: 7},
+    8: {}
+}
+
+print("\n--- Алгоритм Флойда-Уоршелла ---")
+final_matrix = floyd_warshall(graph_22, 8)
+
+print("\nФінальна матриця відстаней (порівняння з ручним розрахунком):")
+print_matrix(final_matrix, 8)
